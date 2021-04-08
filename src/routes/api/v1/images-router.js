@@ -28,7 +28,7 @@ router.get('/:id', (req, res, next) => controller.find(req, res, next))
 router.put('/:id', (req, res, next) => controller.update(req, res, next))
 
 // PATCH images/:id
-router.patch('/:id', (req, res, next) => controller.updateDescription(req, res, next))
+router.patch('/:id', (req, res, next) => controller.partiallyUpdate(req, res, next))
 
 // DELETE tasks/:id
 router.delete('/:id', (req, res, next) => controller.delete(req, res, next))
