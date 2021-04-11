@@ -6,7 +6,7 @@
  */
 // import createError from 'http-errors'
 // import { Image } from '../../models/image.js'
-
+const token = Buffer.from(process.env.ACCESS_TOKEN_SECRET, 'base64')
 /**
  * Encapsulates a controller.
  */
