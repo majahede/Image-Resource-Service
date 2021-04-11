@@ -20,10 +20,6 @@ const imageSchema = new mongoose.Schema({
   },
   location: {
     type: String
-  },
-  id: {
-    type: String,
-    required: true
   }
 }, {
   timestamps: true,
@@ -49,7 +45,7 @@ imageSchema.virtual('id').get(function () {
 /**
  * Gets all images.
  *
- * @returns {Promise<image[]>} The Promise to be fulfilled.
+ * @returns {Promise<Image[]>} The Promise to be fulfilled.
  */
 imageSchema.statics.getAll = async function () {
   return this.find({})
@@ -59,7 +55,7 @@ imageSchema.statics.getAll = async function () {
  * Gets an image by ID.
  *
  * @param {string} id - The value of the id for the image to get.
- * @returns {Promise<image>} The Promise to be fulfilled.
+ * @returns {Promise<Image>} The Promise to be fulfilled.
  */
 imageSchema.statics.getById = async function (id) {
   return this.findOne({ _id: id })
@@ -73,7 +69,7 @@ imageSchema.statics.getById = async function (id) {
  * @param {string} imageData.imgUrl - ...
  * @param {string} imageData.location - ...
  * @param {string} imageData.id - ...
- * @returns {Promise<image>} The Promise to be fulfilled.
+ * @returns {Promise<Image>} The Promise to be fulfilled.
  */
 imageSchema.statics.insert = async function (imageData) {
   const image = new Image(imageData)
@@ -91,14 +87,7 @@ imageSchema.statics.insert = async function (imageData) {
  * @returns {Promise} The Promise to be fulfilled.
  */
 imageSchema.methods.update = async function (imageData) {
-  if (imageData.description?.localeCompare(this.description) !== 0) {
-    this.description = imageData.description
-  }
-
-  if (imageData.done !== this.done) {
-    this.done = imageData.done
-  }
-
+  //
   return this.save()
 }
 
@@ -112,4 +101,4 @@ imageSchema.methods.delete = async function () {
 }
 
 // Create a model using the schema.
-export const image = mongoose.model('Image', imageSchema)
+export const Image = mongoose.model('Image', imageSchema)

@@ -37,7 +37,9 @@ const authenticateJWT = (req, res, next) => {
   }
 
   try {
-    req.jwt = jwt.verify(authorization[1], process.env.ACCESS_TOKEN_SECRET) // samma som när vi signerar
+    const token = Buffer.from(process.env.ACCESS_TOKEN_SECRET, 'base64')
+    req.jwt = jwt.verify(authorization[1], token) // samma som när vi signerar
+
     req.user = {
       email: req.jwt.email,
       permissionLevel: req.jwt.permission_level
