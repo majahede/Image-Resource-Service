@@ -63,7 +63,7 @@ const hasPermission = (req, res, next, permissionLevel) => {
 }
 
 // Provide req.image to the route if :id is present in the route path.
-router.param('id', authenticateJWT, (req, res, next, id) => controller.loadImage(req, res, next, id))
+router.param('id', (req, res, next, id) => controller.loadImage(req, res, next, id))
 
 // GET images
 router.get('/', authenticateJWT, (req, res, next) => hasPermission(req, res, next, PermissionLevels.READ), (req, res, next) => controller.findAll(req, res, next))

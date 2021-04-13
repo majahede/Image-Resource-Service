@@ -30,10 +30,8 @@ export class ImagesController {
         next(createError(404))
         return
       }
-
       // Provide the image to req.
       req.image = image
-
       // Next middleware.
       next()
     } catch (error) {
@@ -49,8 +47,11 @@ export class ImagesController {
    * @param {Function} next - Express next middleware function.
    */
   async find (req, res, next) {
-    // vill ha med endast vissa egenskaper - därför skickar man till transfomrtosafe...
-    res.json(req.image)
+    try {
+      res.json(req.image)
+    } catch (error) {
+      next(error)
+    }
   }
 
   /**
@@ -62,8 +63,8 @@ export class ImagesController {
    */
   async findAll (req, res, next) {
     try {
-      const tasks = await Image.getAll()
-      res.json(tasks)
+      const images = await Image.getAll()
+      res.json(images)
     } catch (error) {
       next(error)
     }
@@ -150,7 +151,11 @@ export class ImagesController {
    */
   async delete (req, res, next) {
     try {
-    //
+      await req.image.delete()
+
+      res
+        .status(204)
+        .end()
     } catch (error) {
       next(error)
     }
