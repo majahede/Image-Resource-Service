@@ -6,6 +6,7 @@
  */
 import createError from 'http-errors'
 import { Image } from '../../models/image.js'
+import fetch from 'node-fetch'
 
 /**
  * Encapsulates a controller.
@@ -77,9 +78,34 @@ export class ImagesController {
    */
   async create (req, res, next) {
     try {
-      //
+      const response = await fetch(process.env.IMAGE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'PRIVATE-TOKEN': process.env.PERSONAL_ACCESS_TOKEN
+        },
+        body: JSON.stringify(req.body)
+      })
+      const data = await response.json()
+      console.log(data)
+
+      const image = await Image.insert({
+        imageUrl: data.imageUrl,
+        description: req.body.description,
+        location: req.body.location,
+        user: req.user.email
+      })
+      res
+        .status(201)
+        .json(image)
     } catch (error) {
-      next(error)
+      let err = error
+      if (error.name === 'ValidationError') {
+        // Validation error(s).
+        err = createError(400)
+        err.innerException = error
+      }
+      next(err)
     }
   }
 

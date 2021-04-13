@@ -9,16 +9,18 @@ import mongoose from 'mongoose'
 
 // Create a schema.
 const imageSchema = new mongoose.Schema({
+  imageUrl: {
+    type: String
+  },
   description: {
     type: String,
     trim: true,
     minlength: 1
   },
-  imgUrl: {
-    type: String,
-    required: true
-  },
   location: {
+    type: String
+  },
+  user: {
     type: String
   }
 }, {
