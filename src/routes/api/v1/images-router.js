@@ -22,16 +22,16 @@ const controller = new ImagesController()
  * @param {Function} next - Express next middleware function.
  */
 const authenticateJWT = (req, res, next) => {
-  const authorization = req.headers.authorization?.split(' ') // kastar inte undantag om authorization är undefined - behöver inte ha if stats innnan för att se om authorization är satt.
+  const authorization = req.headers.authorization?.split(' ')
 
-  if (authorization?.[0] !== 'Bearer') { // skapra 401 om authorization är tom, kontrollerar at det är en bearer
+  if (authorization?.[0] !== 'Bearer') {
     next(createError(401))
     return
   }
 
   try {
     const token = Buffer.from(process.env.ACCESS_TOKEN_SECRET, 'base64')
-    req.jwt = jwt.verify(authorization[1], token) // samma som när vi signerar
+    req.jwt = jwt.verify(authorization[1], token)
 
     req.user = {
       email: req.jwt.email

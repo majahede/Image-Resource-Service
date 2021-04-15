@@ -1,3 +1,10 @@
+/**
+ * The starting point of the application.
+ *
+ * @author Maja Hedegärd
+ * @version 1.0.0
+ */
+
 import express from 'express'
 import logger from 'morgan'
 import helmet from 'helmet'
@@ -20,7 +27,7 @@ const main = async () => {
   app.use(helmet())
 
   // Parse requests of the content type application/json.
-  app.use(express.json())
+  app.use(express.json({ limit: '500kb' }))
 
   // register routes
   app.use('/', router)

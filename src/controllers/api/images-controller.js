@@ -25,17 +25,16 @@ export class ImagesController {
       // Get the image.
       const image = await Image.getById(id)
 
-      // If no image found send a 404 (Not Found).
-      if (!image) {
-        next(createError(404))
-        return
-      }
       // Provide the image to req.
       req.image = image
       // Next middleware.
       next()
     } catch (error) {
-      next(error)
+      let err = error
+      if (error.kind === 'ObjectId') {
+        err = createError(404)
+      }
+      next(err)
     }
   }
 
@@ -48,7 +47,6 @@ export class ImagesController {
    */
   async find (req, res, next) {
     try {
-      console.log(req.image)
       const image = {
         imageUrl: req.image.imageUrl,
         location: req.image.location,
@@ -74,6 +72,7 @@ export class ImagesController {
     try {
       const images = await Image.getAll()
       const userImages = []
+
       images.forEach(image => {
         if (req.user.email === image.user) {
           const img = {
@@ -158,7 +157,7 @@ export class ImagesController {
    */
   async update (req, res, next) {
     try {
-      const payload = {
+      const requestData = {
         data: req.body.data,
         contentType: req.body.contentType
       }
@@ -169,7 +168,7 @@ export class ImagesController {
           'Content-Type': 'application/json',
           'PRIVATE-TOKEN': process.env.PERSONAL_ACCESS_TOKEN
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(requestData)
       })
 
       await req.image.update({
