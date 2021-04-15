@@ -79,23 +79,29 @@ export class ImagesController {
    */
   async create (req, res, next) {
     try {
+      const payload = {
+        data: req.body.data,
+        contentType: req.body.contentType
+      }
+
       const response = await fetch(process.env.IMAGE_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'PRIVATE-TOKEN': process.env.PERSONAL_ACCESS_TOKEN
         },
-        body: JSON.stringify(req.body)
+        body: JSON.stringify(payload)
       })
       const data = await response.json()
-      console.log(data)
 
       const image = await Image.insert({
         imageUrl: data.imageUrl,
         description: req.body.description,
         location: req.body.location,
-        user: req.user.email
+        user: req.user.email,
+        imageId: data.id
       })
+
       res
         .status(201)
         .json(image)
@@ -120,7 +126,28 @@ export class ImagesController {
    */
   async update (req, res, next) {
     try {
-      //
+      const payload = {
+        data: req.body.data,
+        contentType: req.body.contentType
+      }
+
+      await fetch(`${process.env.IMAGE_URL}/${req.image.imageId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'PRIVATE-TOKEN': process.env.PERSONAL_ACCESS_TOKEN
+        },
+        body: JSON.stringify(payload)
+      })
+
+      await req.image.update({
+        description: req.body.description,
+        location: req.body.location
+      })
+
+      res
+        .status(204)
+        .end()
     } catch (error) {
       next(error)
     }
@@ -135,7 +162,13 @@ export class ImagesController {
    */
   async partiallyUpdate (req, res, next) {
     try {
-    //
+      await req.image.update({
+        description: req.body.description,
+        location: req.body.location
+      })
+      res
+        .status(204)
+        .end()
     } catch (error) {
       next(error)
     }
@@ -151,6 +184,15 @@ export class ImagesController {
    */
   async delete (req, res, next) {
     try {
+      const response = await fetch(`${process.env.IMAGE_URL}/${req.image.imageId}`, {
+        method: 'DELETE',
+        headers: {
+          'PRIVATE-TOKEN': process.env.PERSONAL_ACCESS_TOKEN
+        }
+      })
+      const data = await response.json()
+      console.log(data)
+
       await req.image.delete()
 
       res

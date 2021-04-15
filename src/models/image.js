@@ -22,6 +22,9 @@ const imageSchema = new mongoose.Schema({
   },
   user: {
     type: String
+  },
+  imageId: {
+    type: String
   }
 }, {
   timestamps: true,
@@ -89,7 +92,14 @@ imageSchema.statics.insert = async function (imageData) {
  * @returns {Promise} The Promise to be fulfilled.
  */
 imageSchema.methods.update = async function (imageData) {
-  //
+  if (imageData.description !== this.description) {
+    this.description = imageData.description
+  }
+
+  if (imageData.location !== this.location) {
+    this.location = imageData.location
+  }
+
   return this.save()
 }
 
