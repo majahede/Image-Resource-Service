@@ -14,13 +14,6 @@ export const router = express.Router()
 
 const controller = new ImagesController()
 
-const PermissionLevels = Object.freeze({
-  READ: 1,
-  CREATE: 2,
-  UPDATE: 4,
-  DELETE: 8
-})
-
 /**
  * Authenticates requests.
  *
@@ -41,8 +34,7 @@ const authenticateJWT = (req, res, next) => {
     req.jwt = jwt.verify(authorization[1], token) // samma som när vi signerar
 
     req.user = {
-      email: req.jwt.email,
-      permissionLevel: req.jwt.permission_level
+      email: req.jwt.email
     }
     next()
   } catch (err) {
@@ -56,29 +48,32 @@ const authenticateJWT = (req, res, next) => {
  * @param {object} req - Express request object.
  * @param {object} res - Express response object.
  * @param {Function} next - Express next middleware function.
- * @param {number} permissionLevel - ...
  */
-const hasPermission = (req, res, next, permissionLevel) => {
-  req.user?.permissionLevel & permissionLevel ? next() : next(createError(403))
+const hasPermission = (req, res, next) => {
+  if (req.user.email === req.image.user) {
+    next()
+  } else {
+    next(createError(403))
+  }
 }
 
 // Provide req.image to the route if :id is present in the route path.
 router.param('id', (req, res, next, id) => controller.loadImage(req, res, next, id))
 
 // GET images
-router.get('/', authenticateJWT, (req, res, next) => hasPermission(req, res, next, PermissionLevels.READ), (req, res, next) => controller.findAll(req, res, next))
+router.get('/', authenticateJWT, (req, res, next) => controller.findAll(req, res, next))
 
 // POST images
-router.post('/', authenticateJWT, (req, res, next) => hasPermission(req, res, next, PermissionLevels.READ), (req, res, next) => controller.create(req, res, next))
+router.post('/', authenticateJWT, (req, res, next) => controller.create(req, res, next))
 
 // GET images/:id
-router.get('/:id', authenticateJWT, (req, res, next) => hasPermission(req, res, next, PermissionLevels.READ), (req, res, next) => controller.find(req, res, next))
+router.get('/:id', authenticateJWT, (req, res, next) => hasPermission(req, res, next), (req, res, next) => controller.find(req, res, next))
 
 // PUT images/:id
-router.put('/:id', authenticateJWT, (req, res, next) => hasPermission(req, res, next, PermissionLevels.READ), (req, res, next) => controller.update(req, res, next))
+router.put('/:id', authenticateJWT, (req, res, next) => hasPermission(req, res, next), (req, res, next) => controller.update(req, res, next))
 
 // PATCH images/:id
-router.patch('/:id', authenticateJWT, (req, res, next) => hasPermission(req, res, next, PermissionLevels.READ), (req, res, next) => controller.partiallyUpdate(req, res, next))
+router.patch('/:id', authenticateJWT, (req, res, next) => hasPermission(req, res, next), (req, res, next) => controller.partiallyUpdate(req, res, next))
 
 // DELETE tasks/:id
-router.delete('/:id', authenticateJWT, (req, res, next) => hasPermission(req, res, next, PermissionLevels.READ), (req, res, next) => controller.delete(req, res, next))
+router.delete('/:id', authenticateJWT, (req, res, next) => hasPermission(req, res, next), (req, res, next) => controller.delete(req, res, next))

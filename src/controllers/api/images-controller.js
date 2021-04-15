@@ -20,7 +20,7 @@ export class ImagesController {
    * @param {Function} next - Express next middleware function.
    * @param {string} id - The value of the id for the image to load.
    */
-  async loadImage (req, res, next, id) { // Exekveras först, 4 parametrar, id via url.
+  async loadImage (req, res, next, id) {
     try {
       // Get the image.
       const image = await Image.getById(id)
@@ -48,14 +48,23 @@ export class ImagesController {
    */
   async find (req, res, next) {
     try {
-      res.json(req.image)
+      console.log(req.image)
+      const image = {
+        imageUrl: req.image.imageUrl,
+        location: req.image.location,
+        description: req.image.description,
+        createdAt: req.image.createdAt,
+        updatedAt: req.image.updatedAt,
+        id: req.image.id
+      }
+      res.json(image)
     } catch (error) {
       next(error)
     }
   }
 
   /**
-   * Sends a JSON response containing all images.
+   * Sends a JSON response containing the users images.
    *
    * @param {object} req - Express request object.
    * @param {object} res - Express response object.
@@ -64,7 +73,21 @@ export class ImagesController {
   async findAll (req, res, next) {
     try {
       const images = await Image.getAll()
-      res.json(images)
+      const userImages = []
+      images.forEach(image => {
+        if (req.user.email === image.user) {
+          const img = {
+            imageUrl: image.imageUrl,
+            location: image.location,
+            description: image.description,
+            createdAt: image.createdAt,
+            updatedAt: image.updatedAt,
+            id: image.id
+          }
+          userImages.push(img)
+        }
+      })
+      res.json(userImages)
     } catch (error) {
       next(error)
     }
@@ -79,7 +102,7 @@ export class ImagesController {
    */
   async create (req, res, next) {
     try {
-      const payload = {
+      const requestData = {
         data: req.body.data,
         contentType: req.body.contentType
       }
@@ -90,7 +113,7 @@ export class ImagesController {
           'Content-Type': 'application/json',
           'PRIVATE-TOKEN': process.env.PERSONAL_ACCESS_TOKEN
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(requestData)
       })
       const data = await response.json()
 
@@ -102,9 +125,18 @@ export class ImagesController {
         imageId: data.id
       })
 
+      const imageRes = {
+        imageUrl: image.imageUrl,
+        location: image.location,
+        description: image.description,
+        createdAt: image.createdAt,
+        updatedAt: image.updatedAt,
+        id: image.id
+      }
+
       res
         .status(201)
-        .json(image)
+        .json(imageRes)
     } catch (error) {
       let err = error
       if (error.name === 'ValidationError') {
@@ -184,14 +216,12 @@ export class ImagesController {
    */
   async delete (req, res, next) {
     try {
-      const response = await fetch(`${process.env.IMAGE_URL}/${req.image.imageId}`, {
+      await fetch(`${process.env.IMAGE_URL}/${req.image.imageId}`, {
         method: 'DELETE',
         headers: {
           'PRIVATE-TOKEN': process.env.PERSONAL_ACCESS_TOKEN
         }
       })
-      const data = await response.json()
-      console.log(data)
 
       await req.image.delete()
 
